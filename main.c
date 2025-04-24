@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+char **strings = NULL;
 
+void keywords(int n);
 void print_strings(char* strings[] , int n);
 void swap(char **a , char** b);
 void permute(char **arr, int start, int end, FILE* fp);
@@ -23,12 +25,69 @@ void print_strings(char* strings[],int n)
 
 int main() {
     // Start timer
-    int i, n;
-    char buffer[30]; 
-
+    int n;
     printf("Enter the number of keywords to input:");
     scanf("%d",&n);
-    char* strings[n]; 
+
+    keywords(n);
+
+    char cont;
+    printf("Would you like to generate the permutations?(y/n) ");
+    scanf("%c" , &cont);
+    if(cont == 'n' || cont == 'N')
+    {
+        return 0;
+    }
+
+    char outp[100];
+    printf("Name of Output File(anything after '.' is stripped): ");
+    scanf("%s" , outp);
+    int len = strlen(outp);
+    for(int i = 0 ; i < len; i++)
+    {
+        if(outp[i] == '.')
+        {
+            outp[i] = '\0';
+            break;
+        }
+    }
+    strcat(outp , ".txt");
+
+    //print_strings(strings, n);
+    FILE *fp = fopen(outp, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Error opening file for writing\n");
+        exit(1);
+    }
+
+    // Generate and write all permutations into the file.
+    clock_t start_time = clock();
+
+    permute(strings, 0, n, fp);
+
+    clock_t end_time = clock();
+    
+    printf("Permutations stored at %s\n ", outp);
+    // Calculate the elapsed time in seconds.
+    double time_taken = ((double) (end_time - start_time)) / CLOCKS_PER_SEC;
+    printf("Time taken: %.4f seconds\n", time_taken);
+    // Close the file when done.
+    fclose(fp);
+
+    // Free allocated memory.
+    free_keywords(strings, n);
+
+    // End timer
+
+    return 0;
+}
+
+void keywords(int n){
+
+    int i;
+    char buffer[30]; 
+
+    strings = (char**)(malloc(n * sizeof(char*))); 
 
     getchar();
     int n_pw = factorial(n);
@@ -48,39 +107,6 @@ int main() {
     float pred_size = ((char_count + 1) * n_pw + 100.0) / 1024.0 ;
     printf("Predicted Size: %.2f KB \n", pred_size);
 
-    char cont;
-    printf("Would you like to generate the permutations?(y/n) ");
-    scanf("%c" , &cont);
-    if(cont == 'n' || cont == 'N')
-    {
-        return 0;
-    }
-    //print_strings(strings, n);
-    FILE *fp = fopen("permutations.txt", "w");
-    if (fp == NULL) {
-        fprintf(stderr, "Error opening file for writing\n");
-        exit(1);
-    }
-
-    // Generate and write all permutations into the file.
-    clock_t start_time = clock();
-
-    permute(strings, 0, n, fp);
-
-    clock_t end_time = clock();
-    
-    // Calculate the elapsed time in seconds.
-    double time_taken = ((double) (end_time - start_time)) / CLOCKS_PER_SEC;
-    printf("Time taken: %.4f seconds\n", time_taken);
-    // Close the file when done.
-    fclose(fp);
-
-    // Free allocated memory.
-    free_keywords(strings, n);
-
-    // End timer
-
-    return 0;
 }
 
 void free_keywords(char* strings[], int n) {
